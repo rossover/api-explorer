@@ -3,6 +3,29 @@ const PropTypes = require('prop-types');
 const Form = require('react-jsonschema-form').default;
 const UpDownWidget = require('react-jsonschema-form/lib/components/widgets/UpDownWidget').default;
 const TextWidget = require('react-jsonschema-form/lib/components/widgets/TextWidget').default;
+const SchemaField = require('react-jsonschema-form/lib/components/fields/SchemaField').default;
+
+const CustomSchemaField = function(props) {
+  return (
+    <div className="param-item">
+      <SchemaField {...props} />
+    </div>
+  );
+};
+
+const CustomTitleField = ({title, required}) => {
+  const legend = required ? title + '*' : title;
+  return (<div className="param-item-name">
+    <strong>{legend}</strong>
+  </div>);
+};
+
+const CustomIntegerField = ({title, required}) => {
+  const legend = required ? title + '*' : title;
+  return (<div className="param-item-name">
+    <strong>{legend}</strong>
+  </div>);
+};
 
 const Oas = require('./lib/Oas');
 
@@ -18,6 +41,7 @@ function Params({ oas, operation, formData, onChange }) {
         <Form
           id={`form-${operation.operationId}`}
           schema={jsonSchema}
+          fields={{SchemaField: CustomSchemaField, TitleField: CustomTitleField}}
           widgets={{ int64: UpDownWidget, int32: UpDownWidget, uuid: TextWidget }}
           // eslint-disable-next-line no-console
           onSubmit={form => console.log('submit', form.formData)}
