@@ -50,7 +50,7 @@ const Content = props => {
   const { body } = props;
   const isThreeColumn = props['is-three-column'];
   const projectFlags = props.flags;
-  // console.log(projectFlags);
+  console.log(projectFlags.stripe);
 
   const content = parseBlocks(body);
 

@@ -35,17 +35,29 @@ class Doc extends React.Component {
 
     return (
       <div className="hub-api">
-        <PathUrl
-          oas={oas}
-          operation={operation}
-          dirty={this.state.dirty}
-          loading={this.state.loading}
-          onChange={this.onChange}
-        />
+        {this.props.flags.stripe ? (
+          <div className="hub-reference-left">
+            <PathUrl
+              oas={oas}
+              operation={operation}
+              dirty={this.state.dirty}
+              loading={this.state.loading}
+              onChange={this.onChange}
+            />
+          </div>
+        ) : (
+          <PathUrl
+            oas={oas}
+            operation={operation}
+            dirty={this.state.dirty}
+            loading={this.state.loading}
+            onChange={this.onChange}
+          />
+        )}
 
         {showCode(oas, operation) && (
           <div className="hub-reference-section hub-reference-section-code">
-            <div className="hub-reference-left">
+            <div className={this.props.flags.stripe ? 'hub-reference-right' : 'hub-reference-left'}>
               <CodeSample
                 oas={oas}
                 setLanguage={setLanguage}
@@ -137,7 +149,9 @@ Doc.propTypes = {
   }).isRequired,
   oas: PropTypes.shape({}),
   setLanguage: PropTypes.func.isRequired,
-  flags: PropTypes.shape({}),
+  flags: PropTypes.shape({
+    stripe: PropTypes.bool,
+  }),
 };
 
 Doc.defaultProps = {

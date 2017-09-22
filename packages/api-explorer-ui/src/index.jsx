@@ -1,5 +1,6 @@
 const React = require('react');
 const PropTypes = require('prop-types');
+const classNames = require('classnames');
 const extensions = require('../../readme-oas-extensions');
 
 const Doc = require('./Doc');
@@ -20,9 +21,13 @@ class ApiExplorer extends React.Component {
     this.setState({ language });
   }
   render() {
+    const stripe = this.props.flags.stripe ? 'stripe' : '';
     return (
       <div className={`is-lang-${this.state.language}`}>
-        <div id="hub-reference">
+        <div
+          id="hub-reference"
+          className={classNames(`content-body hub-reference-sticky hub-reference-theme-${stripe}`)}
+        >
           {this.props.docs.map(doc => (
             <Doc
               key={doc._id}
@@ -41,7 +46,13 @@ class ApiExplorer extends React.Component {
 ApiExplorer.propTypes = {
   docs: PropTypes.arrayOf(PropTypes.object).isRequired,
   oasFiles: PropTypes.shape({}).isRequired,
-  flags: PropTypes.shape({}).isRequired,
+  flags: PropTypes.shape({
+    stripe: PropTypes.bool,
+  }).isRequired,
+};
+
+ApiExplorer.defaultProps = {
+  stripe: false,
 };
 
 module.exports = ApiExplorer;
