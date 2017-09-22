@@ -62,6 +62,9 @@ class Doc extends React.Component {
                 dirty={this.state.dirty}
                 loading={this.state.loading}
                 onChange={this.onChange}
+                authData={this.state.formData.auth}
+                showAuthBox={this.state.showAuthBox}
+                needsAuth={this.state.needsAuth}
               />
             </div>
           </div>
@@ -72,6 +75,9 @@ class Doc extends React.Component {
             dirty={this.state.dirty}
             loading={this.state.loading}
             onChange={this.onChange}
+            authData={this.state.formData.auth}
+            showAuthBox={this.state.showAuthBox}
+            needsAuth={this.state.needsAuth}
           />
         )}
 

@@ -33,7 +33,7 @@ class ApiExplorer extends React.Component {
     return (
       <div className={`is-lang-${this.state.language}`}>
         {/* The below div does not seem to make any difference stylistically*/}
-        <div id="hub-reference">
+        <div id="hub-container">
           {/* The below div creates a margin on the left as well*/}
           {/* <div className="hub-container"> */}
           {/* Section moves content to the right allowing space for sidebar */}
