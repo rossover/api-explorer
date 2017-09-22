@@ -24,19 +24,35 @@ class ApiExplorer extends React.Component {
     const stripe = this.props.flags.stripe ? 'stripe' : '';
     return (
       <div className={`is-lang-${this.state.language}`}>
-        <div
-          id="hub-reference"
-          className={classNames(`content-body hub-reference-sticky hub-reference-theme-${stripe}`)}
-        >
-          {this.props.docs.map(doc => (
-            <Doc
-              key={doc._id}
-              doc={doc}
-              oas={doc.category.apiSetting ? this.props.oasFiles[doc.category.apiSetting] : {}}
-              setLanguage={this.setLanguage}
-              flags={this.props.flags}
-            />
-          ))}
+        {/* The below div does not seem to make any difference stylistically*/}
+        <div id="hub-container">
+          {/* The below div creates a margin on the left as well*/}
+          {/* <div className="hub-container"> */}
+          {/* Section moves content to the right allowing space for sidebar */}
+          <section id="hub-content">
+            {/* The below div does not seem to make any difference stylistically*/}
+            <div state-container className="hub-content-container" data-state-container="true">
+              <div
+                id="hub-reference"
+                className={classNames(
+                  `content-body hub-reference-sticky hub-reference-theme-${stripe}`,
+                )}
+              >
+                {this.props.docs.map(doc => (
+                  <Doc
+                    key={doc._id}
+                    doc={doc}
+                    oas={
+                      doc.category.apiSetting ? this.props.oasFiles[doc.category.apiSetting] : {}
+                    }
+                    setLanguage={this.setLanguage}
+                    flags={this.props.flags}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+          {/* </div> */}
         </div>
       </div>
     );

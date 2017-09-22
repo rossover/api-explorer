@@ -36,14 +36,16 @@ class Doc extends React.Component {
     return (
       <div className="hub-api">
         {this.props.flags.stripe ? (
-          <div className="hub-reference-left">
-            <PathUrl
-              oas={oas}
-              operation={operation}
-              dirty={this.state.dirty}
-              loading={this.state.loading}
-              onChange={this.onChange}
-            />
+          <div className="hub-reference-section">
+            <div className="hub-reference-left">
+              <PathUrl
+                oas={oas}
+                operation={operation}
+                dirty={this.state.dirty}
+                loading={this.state.loading}
+                onChange={this.onChange}
+              />
+            </div>
           </div>
         ) : (
           <PathUrl
@@ -57,14 +59,27 @@ class Doc extends React.Component {
 
         {showCode(oas, operation) && (
           <div className="hub-reference-section hub-reference-section-code">
-            <div className={this.props.flags.stripe ? 'hub-reference-right' : 'hub-reference-left'}>
-              <CodeSample
-                oas={oas}
-                setLanguage={setLanguage}
-                operation={operation}
-                formData={this.state.formData}
-              />
-            </div>
+            {this.props.flags.stripe ? (
+              <div className="hub-reference-right">
+                <div className="hub-reference-section-code">
+                  <CodeSample
+                    oas={oas}
+                    setLanguage={setLanguage}
+                    operation={operation}
+                    formData={this.state.formData}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="hub-reference-left">
+                <CodeSample
+                  oas={oas}
+                  setLanguage={setLanguage}
+                  operation={operation}
+                  formData={this.state.formData}
+                />
+              </div>
+            )}
             <div className="hub-reference-right" />
           </div>
         )}
