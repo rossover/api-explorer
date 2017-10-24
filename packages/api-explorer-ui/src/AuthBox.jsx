@@ -7,39 +7,42 @@ const { Operation } = require('./lib/Oas');
 function renderSecurities(inputRef, operation, needsAuth, onChange, onSubmit) {
   const securityTypes = operation.prepareSecurity();
 
-  return Object.keys(securityTypes[0]).map(type => {
-    const securities = securityTypes[0][type];
+  return securityTypes.map((securityType, i) => {
+    return Object.keys(securityTypes[i]).map(type => {
+      const securities = securityTypes[i][type];
+      console.log({ securities });
 
-    return (
-      <form key={type} onSubmit={onSubmit}>
-        <h3>{type} Auth</h3>
-        <div className="pad">
-          <section>
-            {
-              // https://github.com/readmeio/api-explorer/issues/20
-              // (type === 'OAuth2' && securities.length > 1) && (
-              //   <select>
-              //     {
-              //       securities.map(security =>
-              //         <option key={security._key} value={security._key}>{security._key}</option>,
-              //       )
-              //     }
-              //   </select>
-              // )
-            }
-            {securities.map(security => (
-              <SecurityInput
-                key={security._key}
-                scheme={security}
-                apiKey=""
-                onChange={onChange}
-                inputRef={inputRef}
-              />
-            ))}
-          </section>
-        </div>
-      </form>
-    );
+      return (
+        <form key={type} onSubmit={onSubmit}>
+          <h3>{type} Auth</h3>
+          <div className="pad">
+            <section>
+              {
+                // https://github.com/readmeio/api-explorer/issues/20
+                // (type === 'OAuth2' && securities.length > 1) && (
+                //   <select>
+                //     {
+                //       securities.map(security =>
+                //         <option key={security._key} value={security._key}>{security._key}</option>,
+                //       )
+                //     }
+                //   </select>
+                // )
+              }
+              {securities.map(security => (
+                <SecurityInput
+                  key={security._key}
+                  scheme={security}
+                  apiKey=""
+                  onChange={onChange}
+                  inputRef={inputRef}
+                />
+              ))}
+            </section>
+          </div>
+        </form>
+      );
+    });
   });
 }
 

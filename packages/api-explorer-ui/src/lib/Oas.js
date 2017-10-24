@@ -19,6 +19,7 @@ class Operation {
 
   prepareSecurity() {
     const securityRequirements = this.getSecurity();
+
     let securityKey;
 
     return securityRequirements.map(requirement => {
@@ -28,6 +29,7 @@ class Operation {
         keys.forEach(key => {
           securities.push(this.oas.components.securitySchemes[key]);
         });
+        // console.log({ securities });
       } catch (e) {
         return false;
       }
@@ -47,7 +49,7 @@ class Operation {
             type = 'Header';
           }
           security._key = securityKey;
-
+          // console.log({ security });
           return { type, security };
         })
         .filter(Boolean)
