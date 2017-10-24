@@ -19,6 +19,7 @@ class Operation {
 
   prepareSecurity() {
     const securityRequirements = this.getSecurity();
+    // console.log({securityRequirements})
 
     return securityRequirements
       .map(requirement => {
@@ -26,6 +27,7 @@ class Operation {
         let key;
         try {
           key = Object.keys(requirement)[0];
+          console.log({ key });
           security = this.oas.components.securitySchemes[key];
         } catch (e) {
           return false;

@@ -6,6 +6,7 @@ const { Operation } = require('./lib/Oas');
 
 function renderSecurities(inputRef, operation, needsAuth, onChange, onSubmit) {
   const securityTypes = operation.prepareSecurity();
+  console.log(operation);
   return Object.keys(securityTypes).map(type => {
     const securities = securityTypes[type];
     return (
