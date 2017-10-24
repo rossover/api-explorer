@@ -6,9 +6,10 @@ const { Operation } = require('./lib/Oas');
 
 function renderSecurities(inputRef, operation, needsAuth, onChange, onSubmit) {
   const securityTypes = operation.prepareSecurity();
-  console.log(operation);
-  return Object.keys(securityTypes).map(type => {
-    const securities = securityTypes[type];
+
+  return Object.keys(securityTypes[0]).map(type => {
+    const securities = securityTypes[0][type];
+
     return (
       <form key={type} onSubmit={onSubmit}>
         <h3>{type} Auth</h3>

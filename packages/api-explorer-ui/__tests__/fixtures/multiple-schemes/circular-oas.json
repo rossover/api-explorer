@@ -57,7 +57,7 @@
         "security": [
           {
             "petstore_auth": ["write:pets", "read:pets"],
-            "petstore_auth2": ["write:pets", "read:pets"]
+            "api_key": []
           }
         ],
         "requestBody": {

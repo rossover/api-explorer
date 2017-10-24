@@ -19,41 +19,77 @@ class Operation {
 
   prepareSecurity() {
     const securityRequirements = this.getSecurity();
-    // console.log({securityRequirements})
+    let securityKey;
 
-    return securityRequirements
-      .map(requirement => {
-        let security;
-        let key;
-        try {
-          key = Object.keys(requirement)[0];
-          console.log({ key });
-          security = this.oas.components.securitySchemes[key];
-        } catch (e) {
-          return false;
-        }
+    return securityRequirements.map(requirement => {
+      const keys = Object.keys(requirement);
+      const securities = [];
+      try {
+        keys.forEach(key => {
+          securities.push(this.oas.components.securitySchemes[key]);
+        });
+      } catch (e) {
+        return false;
+      }
+      if (!securities) return false;
+      return securities
+        .map(security => {
+          let type = security.type;
+          if (security.type === 'http' && security.scheme === 'basic') {
+            type = 'Basic';
+            securityKey = 'api_key';
+          } else if (security.type === 'oauth2') {
+            type = 'OAuth2';
+            securityKey = 'petstore_auth';
+          } else if (security.type === 'apiKey' && security.in === 'query') {
+            type = 'Query';
+          } else if (security.type === 'apiKey' && security.in === 'header') {
+            type = 'Header';
+          }
+          security._key = securityKey;
 
-        if (!security) return false;
-        let type = security.type;
-        if (security.type === 'http' && security.scheme === 'basic') {
-          type = 'Basic';
-        } else if (security.type === 'oauth2') {
-          type = 'OAuth2';
-        } else if (security.type === 'apiKey' && security.in === 'query') {
-          type = 'Query';
-        } else if (security.type === 'apiKey' && security.in === 'header') {
-          type = 'Header';
-        }
+          return { type, security };
+        })
+        .filter(Boolean)
+        .reduce((prev, next) => {
+          // console.log({ prev, next });
+          if (!prev[next.type]) prev[next.type] = [];
+          prev[next.type].push(next.security);
+          return prev;
+        }, {});
+    });
 
-        security._key = key;
-        return { type, security };
-      })
-      .filter(Boolean)
-      .reduce((prev, next) => {
-        if (!prev[next.type]) prev[next.type] = [];
-        prev[next.type].push(next.security);
-        return prev;
-      }, {});
+    // .map(requirement => {
+    //   let security;
+    //   let key;
+    //   try {
+    //     key = Object.keys(requirement)[0];
+    //     security = this.oas.components.securitySchemes[key];
+    //   } catch (e) {
+    //     return false;
+    //   }
+    //
+    //   if (!security) return false;
+    //   let type = security.type;
+    //   if (security.type === 'http' && security.scheme === 'basic') {
+    //     type = 'Basic';
+    //   } else if (security.type === 'oauth2') {
+    //     type = 'OAuth2';
+    //   } else if (security.type === 'apiKey' && security.in === 'query') {
+    //     type = 'Query';
+    //   } else if (security.type === 'apiKey' && security.in === 'header') {
+    //     type = 'Header';
+    //   }
+    //
+    //   security._key = key;
+    //   return { type, security };
+    // })
+    // .filter(Boolean)
+    // .reduce((prev, next) => {
+    //   if (!prev[next.type]) prev[next.type] = [];
+    //   prev[next.type].push(next.security);
+    //   return prev;
+    // }, {})
   }
 }
 
