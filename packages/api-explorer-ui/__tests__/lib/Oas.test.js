@@ -100,9 +100,11 @@ describe('operation.prepareSecurity()', () => {
     });
     const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toEqual({
-      Basic: [oas.components.securitySchemes.securityScheme],
-    });
+    expect(operation.prepareSecurity()).toEqual([
+      {
+        Basic: [oas.components.securitySchemes.securityScheme],
+      },
+    ]);
   });
 
   test('apiKey/query: should return with a type of Query', () => {
@@ -114,9 +116,11 @@ describe('operation.prepareSecurity()', () => {
     });
     const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toEqual({
-      Query: [oas.components.securitySchemes.securityScheme],
-    });
+    expect(operation.prepareSecurity()).toEqual([
+      {
+        Query: [oas.components.securitySchemes.securityScheme],
+      },
+    ]);
   });
 
   test('apiKey/header: should return with a type of Header', () => {
@@ -128,9 +132,11 @@ describe('operation.prepareSecurity()', () => {
     });
     const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toEqual({
-      Header: [oas.components.securitySchemes.securityScheme],
-    });
+    expect(operation.prepareSecurity()).toEqual([
+      {
+        Header: [oas.components.securitySchemes.securityScheme],
+      },
+    ]);
   });
 
   test('should work for petstore', () => {

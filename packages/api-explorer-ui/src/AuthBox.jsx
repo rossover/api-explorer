@@ -10,7 +10,6 @@ function renderSecurities(inputRef, operation, needsAuth, onChange, onSubmit) {
   return securityTypes.map((securityType, i) => {
     return Object.keys(securityTypes[i]).map(type => {
       const securities = securityTypes[i][type];
-      console.log({ securities });
 
       return (
         <form key={type} onSubmit={onSubmit}>
