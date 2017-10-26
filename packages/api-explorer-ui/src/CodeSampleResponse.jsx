@@ -5,7 +5,7 @@ const showCodeResults = require('./lib/show-code-results');
 const statusCodes = require('./lib/statuscodes');
 // const { replaceVars } = require('./lib/replace-vars');
 const extensions = require('../../readme-oas-extensions');
-const generateCodeSnippets = require('./lib/generate-code-snippet');
+const { getLangName } = require('./lib/generate-code-snippet');
 const syntaxHighlighter = require('../../readme-syntax-highlighter');
 const codemirror = require('../../readme-syntax-highlighter/codemirror');
 
@@ -197,7 +197,7 @@ class CodeSampleResponse extends React.Component {
           </div>
 
           <div className="hub-reference-results-examples code-sample">
-            {showCodeResults(operation).length && (
+            {showCodeResults(operation).length > 0 && (
               <span>
                 <ul className="code-sample-tabs hub-reference-results-header">
                   {showCodeResults(operation).map((example, index) => {
@@ -229,7 +229,7 @@ class CodeSampleResponse extends React.Component {
                             </em>
                           </span>
                         ) : (
-                          <span>{generateCodeSnippets.getLangName(example.language)}</span>
+                          <span>{getLangName(example.language)}</span>
                         )}
                       </a>
                     );
