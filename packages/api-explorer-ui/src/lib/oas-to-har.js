@@ -38,6 +38,7 @@ function getContentType(pathOperation) {
   const types =
     (pathOperation &&
       pathOperation.requestBody &&
+      pathOperation.requestBody.content &&
       Object.keys(pathOperation.requestBody.content)) ||
     [];
 
@@ -105,30 +106,31 @@ module.exports = (oas, pathOperation = { path: '', method: '' }, values = {}) =>
     });
   }
 
-  // Add content-type header if there are any values, or any headers
-  // have been set already
-  if (Object.keys(values).length > 0 || har.headers.length) {
-    har.headers.push({
-      name: 'Content-Type',
-      value: getContentType(pathOperation),
-    });
-  }
-
   const body = getSchema(pathOperation) || {};
 
   if (body && Object.keys(body).length && Object.keys(formData.body).length) {
     har.postData.text = JSON.stringify(formData.body);
   }
 
+  // Add content-type header if there are any body values or if there is a `requestBody`
+  if (Object.keys(formData.body).length || Object.keys(body).length) {
+    har.headers.push({
+      name: 'Content-Type',
+      value: getContentType(pathOperation),
+    });
+  }
+
   const securityRequirements = pathOperation.security || oas.security;
 
   if (securityRequirements && securityRequirements.length) {
     // TODO pass these values through the formatter?
-    securityRequirements.forEach(security => {
-      const securityValue = configureSecurity(oas, formData, security);
+    securityRequirements.forEach(schemes => {
+      Object.keys(schemes).forEach(security => {
+        const securityValue = configureSecurity(oas, formData, security);
 
-      if (!securityValue) return;
-      har[securityValue.type].push(securityValue.value);
+        if (!securityValue) return;
+        har[securityValue.type].push(securityValue.value);
+      });
     });
   }
   return { log: { entries: [{ request: har }] } };

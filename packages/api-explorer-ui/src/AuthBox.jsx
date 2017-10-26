@@ -4,7 +4,7 @@ const classNames = require('classnames');
 const SecurityInput = require('./SecurityInput');
 const { Operation } = require('./lib/Oas');
 
-function renderSecurities(operation, onChange, onSubmit) {
+function renderSecurities(authInputRef, operation, onChange, onSubmit) {
   const securityTypes = operation.prepareSecurity();
   return Object.keys(securityTypes).map(type => {
     const securities = securityTypes[type];
@@ -26,7 +26,13 @@ function renderSecurities(operation, onChange, onSubmit) {
               // )
             }
             {securities.map(security => (
-              <SecurityInput key={security._key} scheme={security} apiKey="" onChange={onChange} />
+              <SecurityInput
+                key={security._key}
+                scheme={security}
+                apiKey=""
+                onChange={onChange}
+                authInputRef={authInputRef}
+              />
             ))}
           </section>
         </div>
@@ -35,36 +41,55 @@ function renderSecurities(operation, onChange, onSubmit) {
   });
 }
 
-function AuthBox({ operation, onChange, onSubmit, open, needsAuth, toggle }) {
-  if (!operation.hasAuth()) return null;
+class AuthBox extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+    this.onChange = this.onChange.bind(this);
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.auth !== this.state.auth) this.props.onChange({ auth: this.state.auth });
+  }
+  onChange(auth) {
+    this.setState(previousState => {
+      return {
+        auth: Object.assign({}, previousState.auth, auth),
+      };
+    });
+  }
+  render() {
+    const { authInputRef, operation, onSubmit, open, needsAuth, toggle } = this.props;
+    if (!operation.hasAuth()) return null;
 
-  return (
-    <div className={classNames('hub-auth-dropdown', 'simple-dropdown', { open })}>
-      {
-        // eslint-disable-next-line jsx-a11y/anchor-has-content
-        <a href="" className="icon icon-user-lock" onClick={toggle} />
-      }
-      <div className="nopad">
-        <div className="triangle" />
-        <div>
-          {renderSecurities(operation, onChange, e => {
-            e.preventDefault();
-            onSubmit();
-          })}
-        </div>
-        <div className={classNames('hub-authrequired', { active: needsAuth })}>
-          <div className="hub-authrequired-slider">
-            <i className="icon icon-notification" />
-            Authentication is required for this endpoint
+    return (
+      <div className={classNames('hub-auth-dropdown', 'simple-dropdown', { open })}>
+        {
+          // eslint-disable-next-line jsx-a11y/anchor-has-content
+          <a href="" className="icon icon-user-lock" onClick={toggle} />
+        }
+        <div className="nopad">
+          <div className="triangle" />
+          <div>
+            {renderSecurities(authInputRef, operation, this.onChange, e => {
+              e.preventDefault();
+              onSubmit();
+            })}
+          </div>
+          <div className={classNames('hub-authrequired', { active: needsAuth })}>
+            <div className="hub-authrequired-slider">
+              <i className="icon icon-notification" />
+              Authentication is required for this endpoint
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 AuthBox.propTypes = {
   operation: PropTypes.instanceOf(Operation).isRequired,
+  authInputRef: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   toggle: PropTypes.func.isRequired,
@@ -75,6 +100,7 @@ AuthBox.propTypes = {
 AuthBox.defaultProps = {
   needsAuth: false,
   open: false,
+  authInputRef: () => {},
 };
 
 module.exports = AuthBox;

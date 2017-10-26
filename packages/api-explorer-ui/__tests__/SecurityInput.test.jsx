@@ -2,6 +2,24 @@ const React = require('react');
 const { mount, shallow } = require('enzyme');
 const SecurityInput = require('../src/SecurityInput');
 
+test('should render an Oauth2 component if type is oauth2', () => {
+  const props = { scheme: { type: 'oauth2', _key: 'auth', name: 'auth' }, onChange: () => {} };
+  const securityInput = shallow(<SecurityInput {...props} />);
+  expect(securityInput.find('Oauth2').length).toBe(1);
+});
+
+test('should render an ApiKey component if type is apiKey', () => {
+  const props = { scheme: { type: 'apiKey', _key: 'auth', name: 'auth' }, onChange: () => {} };
+  const securityInput = shallow(<SecurityInput {...props} />);
+  expect(securityInput.find('ApiKey').length).toBe(1);
+});
+
+test('should render a Basic component if type is http', () => {
+  const props = { scheme: { type: 'http', _key: 'auth', name: 'auth' }, onChange: () => {} };
+  const securityInput = shallow(<SecurityInput {...props} />);
+  expect(securityInput.find('Basic').length).toBe(1);
+});
+
 describe('oauth2', () => {
   const props = { scheme: { type: 'oauth2', _key: 'test-auth' }, onChange: () => {} };
 
@@ -30,7 +48,7 @@ describe('oauth2', () => {
     securityInput.find('input[type="text"]').instance().value = '1234';
     securityInput.find('input[type="text"]').simulate('change');
 
-    expect(onChange.mock.calls[0][0]).toEqual({ auth: { 'test-auth': '1234' } });
+    expect(onChange.mock.calls[0][0]).toEqual({ 'test-auth': '1234' });
   });
 });
 
@@ -47,13 +65,7 @@ describe('apiKey', () => {
     securityInput.find('input').instance().value = 'user';
     securityInput.find('input').simulate('change');
 
-    expect(onChange.mock.calls[0]).toEqual([
-      {
-        auth: {
-          api_key: 'user',
-        },
-      },
-    ]);
+    expect(onChange.mock.calls[0][0]).toEqual({ api_key: 'user' });
   });
   test('should display name inside label', () => {
     const onChange = jest.fn();
@@ -79,11 +91,9 @@ describe('basic', () => {
     securityInput.find('input[name="password"]').simulate('change');
 
     expect(onChange.mock.calls[1][0]).toEqual({
-      auth: {
-        'test-basic': {
-          user: 'user',
-          password: 'pass',
-        },
+      'test-basic': {
+        user: 'user',
+        password: 'pass',
       },
     });
   });

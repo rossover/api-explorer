@@ -56,6 +56,7 @@ class Doc extends React.Component {
     ) {
       this.setState({ showAuthBox: true });
       setTimeout(() => {
+        this.authInput.focus();
         this.setState({ needsAuth: true });
       }, 600);
       return false;
@@ -99,11 +100,11 @@ class Doc extends React.Component {
           dirty={this.state.dirty}
           loading={this.state.loading}
           onChange={this.onChange}
-          authData={this.state.formData.auth}
           showAuthBox={this.state.showAuthBox}
           needsAuth={this.state.needsAuth}
           toggleAuth={this.toggleAuth}
           onSubmit={this.onSubmit}
+          authInputRef={el => (this.authInput = el)}
         />
 
         {showCode(oas, operation) && (
@@ -114,6 +115,7 @@ class Doc extends React.Component {
                 setLanguage={setLanguage}
                 operation={operation}
                 formData={this.state.formData}
+                language={this.props.language}
               />
             </div>
             <CodeSampleResponse
@@ -209,6 +211,7 @@ Doc.propTypes = {
   oas: PropTypes.shape({}),
   setLanguage: PropTypes.func.isRequired,
   flags: PropTypes.shape({}),
+  language: PropTypes.string.isRequired,
 };
 
 Doc.defaultProps = {
