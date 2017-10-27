@@ -13,7 +13,7 @@ const ResponseSchema = require('./Response');
 
 const Oas = require('./lib/Oas');
 const showCode = require('./lib/show-code');
-const result = require('./lib/parse-response');
+const parseResponse = require('./lib/parse-response');
 const Content = require('./block-types/Content');
 
 class Doc extends React.Component {
@@ -42,12 +42,6 @@ class Doc extends React.Component {
     });
   }
   onSubmit() {
-    const req = oasToHar(
-      this.oas,
-      this.oas.operation(this.props.doc.swagger.path, this.props.doc.api.method),
-      this.state.formData,
-    );
-
     if (
       !isAuthReady(
         this.oas.operation(this.props.doc.swagger.path, this.props.doc.api.method),
@@ -64,21 +58,19 @@ class Doc extends React.Component {
 
     this.setState({ loading: true, showAuthBox: false, needsAuth: false });
 
-    return fetchHar(req)
-      .then(res => {
-        const contentType = res.headers.get('content-type');
-        const isJson = contentType && contentType.includes('application/json');
+    const har = oasToHar(
+      this.oas,
+      this.oas.operation(this.props.doc.swagger.path, this.props.doc.api.method),
+      this.state.formData,
+      { proxyUrl: true },
+    );
 
-        return res[isJson ? 'json' : 'text']().then(responseBody => {
-          return { responseBody, res };
-        });
-      })
-      .then(({ responseBody, res }) => {
-        this.setState({
-          loading: false,
-          result: result(res, responseBody, req),
-        });
+    return fetchHar(har).then(async res => {
+      this.setState({
+        loading: false,
+        result: await parseResponse(har, res),
       });
+    });
   }
 
   toggleAuth(e) {
