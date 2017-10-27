@@ -13,7 +13,7 @@ const ResponseSchema = require('./Response');
 
 const Oas = require('./lib/Oas');
 const showCode = require('./lib/show-code');
-const result = require('./lib/code-sample-response');
+const result = require('./lib/parse-response');
 const Content = require('./block-types/Content');
 
 class Doc extends React.Component {

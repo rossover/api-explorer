@@ -1,4 +1,4 @@
-const codeSampleResponse = require('../../src/lib/code-sample-response');
+const ParseResponse = require('../../src/lib/parse-response');
 const { Headers } = require('node-fetch');
 
 const req = {
@@ -34,7 +34,7 @@ const responseBody = {
 const headers = new Headers();
 headers.set('Content-Disposition', 'application/json');
 
-describe('codeSampleResponse', () => {
+describe('ParseResponse', () => {
   it('should return result object', () => {
     const res = {
       type: 'cors',
@@ -46,8 +46,7 @@ describe('codeSampleResponse', () => {
       headers,
     };
 
-    expect(codeSampleResponse(res, responseBody, req)).toEqual({
-      init: true,
+    expect(ParseResponse(res, responseBody, req)).toEqual({
       isBinary: false,
       method: 'POST',
       requestHeaders: 'Authorization: Bearer api-key',
@@ -59,7 +58,7 @@ describe('codeSampleResponse', () => {
   });
 });
 
-describe('codeSampleResponse', () => {
+describe('ParseResponse', () => {
   it('should return result object and default to 404 if status is not in response', () => {
     const res = {
       type: 'cors',
@@ -70,8 +69,7 @@ describe('codeSampleResponse', () => {
       headers,
     };
 
-    expect(codeSampleResponse(res, responseBody, req)).toEqual({
-      init: true,
+    expect(ParseResponse(res, responseBody, req)).toEqual({
       isBinary: false,
       method: 'POST',
       requestHeaders: 'Authorization: Bearer api-key',
