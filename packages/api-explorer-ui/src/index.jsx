@@ -15,9 +15,8 @@ class ApiExplorer extends React.Component {
     this.getDefaultLanguage = this.getDefaultLanguage.bind(this);
   }
   setLanguage(language) {
-    this.setState({ language }, () => {
-      Cookie.set('readme_language', language);
-    });
+    this.setState({ language });
+    Cookie.set('readme_language', language);
   }
 
   getDefaultLanguage() {
@@ -32,6 +31,7 @@ class ApiExplorer extends React.Component {
     const stripe = this.props.flags.stripe ? 'stripe' : '';
     return (
       <div className={`is-lang-${this.state.language}`}>
+<<<<<<< HEAD
         {/* The below div does not seem to make any difference stylistically*/}
         <div id="hub-container">
           {/* The below div creates a margin on the left as well*/}
@@ -61,6 +61,19 @@ class ApiExplorer extends React.Component {
             </div>
           </section>
           {/* </div> */}
+=======
+        <div id="hub-reference">
+          {this.props.docs.map(doc => (
+            <Doc
+              key={doc._id}
+              doc={doc}
+              oas={doc.category.apiSetting && this.props.oasFiles[doc.category.apiSetting]}
+              setLanguage={this.setLanguage}
+              flags={this.props.flags}
+              language={this.state.language}
+            />
+          ))}
+>>>>>>> 47d61925d3337d4a380464bd2a67a05c49d378d0
         </div>
       </div>
     );

@@ -10,8 +10,8 @@ function isAuthReady(operation, authData) {
     if (!operation.oas.components.securitySchemes[key]) return;
     const security = operation.oas.components.securitySchemes[key];
     const auth = authInputData[key];
-    if (security.type === 'basic') {
-      if (!auth || !auth.username) {
+    if (security.type === 'http' && security.scheme === 'basic') {
+      if (!auth || !auth.user) {
         ready = false;
       }
     }

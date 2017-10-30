@@ -1,3 +1,4 @@
+const extensions = require('../../../readme-oas-extensions');
 const getSchema = require('./get-schema');
 const configureSecurity = require('./configure-security');
 
@@ -32,7 +33,36 @@ const defaultValues = Object.keys(
   return Object.assign(prev, { [curr]: {} });
 }, {});
 
-module.exports = (oas, pathOperation = { path: '', method: '' }, values = {}) => {
+// If you pass in types, it either uses a default, or favors
+// anything JSON.
+function getContentType(pathOperation) {
+  const types =
+    (pathOperation &&
+      pathOperation.requestBody &&
+      pathOperation.requestBody.content &&
+      Object.keys(pathOperation.requestBody.content)) ||
+    [];
+
+  let type = 'application/json';
+  if (types && types.length) {
+    type = types[0];
+  }
+
+  // Favor JSON if it exists
+  types.forEach(t => {
+    if (t.match(/json/)) {
+      type = t;
+    }
+  });
+  return type;
+}
+
+module.exports = (
+  oas,
+  pathOperation = { path: '', method: '' },
+  values = {},
+  opts = { proxyUrl: false },
+) => {
   const formData = Object.assign({}, defaultValues, values);
   const har = {
     headers: [],
@@ -41,6 +71,10 @@ module.exports = (oas, pathOperation = { path: '', method: '' }, values = {}) =>
     method: pathOperation.method.toUpperCase(),
     url: `${oas.servers ? oas.servers[0].url : ''}${pathOperation.path}`.replace(/\s/g, '%20'),
   };
+
+  if (oas[extensions.PROXY_ENABLED] && opts.proxyUrl) {
+    har.url = `https://try.readme.io/${har.url}`;
+  }
 
   har.url = har.url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, (full, key) => {
     if (!pathOperation || !pathOperation.parameters) return key; // No path params at all
@@ -88,17 +122,26 @@ module.exports = (oas, pathOperation = { path: '', method: '' }, values = {}) =>
     har.postData.text = JSON.stringify(formData.body);
   }
 
+  // Add content-type header if there are any body values or if there is a `requestBody`
+  if (Object.keys(formData.body).length || Object.keys(body).length) {
+    har.headers.push({
+      name: 'Content-Type',
+      value: getContentType(pathOperation),
+    });
+  }
+
   const securityRequirements = pathOperation.security || oas.security;
 
   if (securityRequirements && securityRequirements.length) {
     // TODO pass these values through the formatter?
-    securityRequirements.forEach(security => {
-      const securityValue = configureSecurity(oas, formData, security);
+    securityRequirements.forEach(schemes => {
+      Object.keys(schemes).forEach(security => {
+        const securityValue = configureSecurity(oas, formData, security);
 
-      if (!securityValue) return;
-      har[securityValue.type].push(securityValue.value);
+        if (!securityValue) return;
+        har[securityValue.type].push(securityValue.value);
+      });
     });
   }
-
-  return har;
+  return { log: { entries: [{ request: har }] } };
 };

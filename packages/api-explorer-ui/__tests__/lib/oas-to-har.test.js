@@ -1,23 +1,32 @@
+const extensions = require('../../../readme-oas-extensions');
 const oasToHar = require('../../src/lib/oas-to-har');
 
 test('should output a har format', () => {
   expect(oasToHar({})).toEqual({
-    headers: [],
-    queryString: [],
-    postData: {},
-    method: '',
-    url: '',
+    log: {
+      entries: [
+        {
+          request: {
+            headers: [],
+            method: '',
+            postData: {},
+            queryString: [],
+            url: '',
+          },
+        },
+      ],
+    },
   });
 });
 
 test('should uppercase the method', () => {
-  expect(oasToHar({}, { path: '/', method: 'get' }).method).toBe('GET');
+  expect(oasToHar({}, { path: '/', method: 'get' }).log.entries[0].request.method).toBe('GET');
 });
 
 describe('url', () => {
   test('should default to ""', () => {
-    expect(oasToHar({}, { path: '', method: '' }).url).toBe('');
-    expect(oasToHar({}, { path: '/path', method: '' }).url).toBe('/path');
+    expect(oasToHar({}, { path: '', method: '' }).log.entries[0].request.url).toBe('');
+    expect(oasToHar({}, { path: '/path', method: '' }).log.entries[0].request.url).toBe('/path');
   });
 
   test('should be constructed from servers[0]', () => {
@@ -27,7 +36,7 @@ describe('url', () => {
           servers: [{ url: 'http://example.com' }],
         },
         { path: '/path', method: 'get' },
-      ).url,
+      ).log.entries[0].request.url,
     ).toBe('http://example.com/path');
   });
 
@@ -38,16 +47,44 @@ describe('url', () => {
           servers: [{ url: 'http://example.com' }],
         },
         { path: '/path with spaces', method: '' },
-      ).url,
+      ).log.entries[0].request.url,
     ).toBe('http://example.com/path%20with%20spaces');
   });
 
-  test('should replace path params with values');
+  describe('proxy url', () => {
+    test('should not be prefixed with without option', () => {
+      expect(
+        oasToHar(
+          {
+            servers: [{ url: 'http://example.com' }],
+            [extensions.PROXY_ENABLED]: true,
+          },
+          { path: '/path', method: 'get' },
+        ).log.entries[0].request.url,
+      ).toBe('http://example.com/path');
+    });
+
+    test('should be prefixed with try.readme.io with option', () => {
+      expect(
+        oasToHar(
+          {
+            servers: [{ url: 'http://example.com' }],
+            [extensions.PROXY_ENABLED]: true,
+          },
+          { path: '/path', method: 'get' },
+          {},
+          { proxyUrl: true },
+        ).log.entries[0].request.url,
+      ).toBe('https://try.readme.io/http://example.com/path');
+    });
+  });
 });
 
 describe('path values', () => {
   test('should pass through unknown path params', () => {
-    expect(oasToHar({}, { path: '/param-path/{id}', method: '' }).url).toBe('/param-path/id');
+    expect(oasToHar({}, { path: '/param-path/{id}', method: '' }).log.entries[0].request.url).toBe(
+      '/param-path/id',
+    );
     expect(
       oasToHar(
         {},
@@ -62,7 +99,7 @@ describe('path values', () => {
             },
           ],
         },
-      ).url,
+      ).log.entries[0].request.url,
     ).toBe('/param-path/id');
   });
 
@@ -82,7 +119,7 @@ describe('path values', () => {
           ],
         },
         {},
-      ).url,
+      ).log.entries[0].request.url,
     ).toBe('/param-path/id');
   });
 
@@ -102,7 +139,7 @@ describe('path values', () => {
             },
           ],
         },
-      ).url,
+      ).log.entries[0].request.url,
     ).toBe('/param-path/123');
   });
 
@@ -122,7 +159,7 @@ describe('path values', () => {
           ],
         },
         { path: { id: '456' } },
-      ).url,
+      ).log.entries[0].request.url,
     ).toBe('/param-path/456');
   });
 });
@@ -142,7 +179,7 @@ describe('query values', () => {
             },
           ],
         },
-      ).queryString,
+      ).log.entries[0].request.queryString,
     ).toEqual([]);
   });
 
@@ -162,7 +199,7 @@ describe('query values', () => {
             },
           ],
         },
-      ).queryString,
+      ).log.entries[0].request.queryString,
     ).toEqual([{ name: 'a', value: 'value' }]);
   });
 
@@ -183,7 +220,7 @@ describe('query values', () => {
           ],
         },
         { query: { a: 'test' } },
-      ).queryString,
+      ).log.entries[0].request.queryString,
     ).toEqual([{ name: 'a', value: 'test' }]);
   });
 });
@@ -203,7 +240,7 @@ describe('header values', () => {
             },
           ],
         },
-      ).headers,
+      ).log.entries[0].request.headers,
     ).toEqual([]);
   });
 
@@ -223,7 +260,7 @@ describe('header values', () => {
             },
           ],
         },
-      ).headers,
+      ).log.entries[0].request.headers,
     ).toEqual([{ name: 'a', value: 'value' }]);
   });
 
@@ -244,7 +281,7 @@ describe('header values', () => {
           ],
         },
         { header: { a: 'test' } },
-      ).headers,
+      ).log.entries[0].request.headers,
     ).toEqual([{ name: 'a', value: 'test' }]);
   });
 });
@@ -272,7 +309,7 @@ describe('body values', () => {
             },
           },
         },
-      ).postData.text,
+      ).log.entries[0].request.postData.text,
     ).toEqual(undefined);
   });
 
@@ -301,7 +338,7 @@ describe('body values', () => {
             },
           },
         },
-      ).postData.text,
+      ).log.entries[0].request.postData.text,
     ).toEqual(JSON.stringify({ a: 'value' }));
   });
 
@@ -330,7 +367,7 @@ describe('body values', () => {
           },
         },
         { body: { a: 'test' } },
-      ).postData.text,
+      ).log.entries[0].request.postData.text,
     ).toEqual(JSON.stringify({ a: 'test' }));
   });
 });
@@ -362,7 +399,7 @@ describe('auth', () => {
             'auth-header': 'value',
           },
         },
-      ).headers,
+      ).log.entries[0].request.headers,
     ).toEqual([
       {
         name: 'x-auth-header',
@@ -395,7 +432,7 @@ describe('auth', () => {
             'auth-query': 'value',
           },
         },
-      ).queryString,
+      ).log.entries[0].request.queryString,
     ).toEqual([
       {
         name: 'authQuery',
@@ -404,7 +441,91 @@ describe('auth', () => {
     ]);
   });
 
-  test('should work for multiple');
+  test('should work for multiple (||)', () => {
+    expect(
+      oasToHar(
+        {
+          components: {
+            securitySchemes: {
+              'auth-header': {
+                type: 'apiKey',
+                name: 'x-auth-header',
+                in: 'header',
+              },
+              'auth-header2': {
+                type: 'apiKey',
+                name: 'x-auth-header2',
+                in: 'header',
+              },
+            },
+          },
+        },
+        {
+          path: '/security',
+          method: 'get',
+          security: [{ 'auth-header': [] }, { 'auth-header2': [] }],
+        },
+        {
+          auth: {
+            'auth-header': 'value',
+            'auth-header2': 'value',
+          },
+        },
+      ).log.entries[0].request.headers,
+    ).toEqual([
+      {
+        name: 'x-auth-header',
+        value: 'value',
+      },
+      {
+        name: 'x-auth-header2',
+        value: 'value',
+      },
+    ]);
+  });
+
+  test('should work for multiple (&&)', () => {
+    expect(
+      oasToHar(
+        {
+          components: {
+            securitySchemes: {
+              'auth-header': {
+                type: 'apiKey',
+                name: 'x-auth-header',
+                in: 'header',
+              },
+              'auth-header2': {
+                type: 'apiKey',
+                name: 'x-auth-header2',
+                in: 'header',
+              },
+            },
+          },
+        },
+        {
+          path: '/security',
+          method: 'get',
+          security: [{ 'auth-header': [], 'auth-header2': [] }],
+        },
+        {
+          auth: {
+            'auth-header': 'value',
+            'auth-header2': 'value',
+          },
+        },
+      ).log.entries[0].request.headers,
+    ).toEqual([
+      {
+        name: 'x-auth-header',
+        value: 'value',
+      },
+      {
+        name: 'x-auth-header2',
+        value: 'value',
+      },
+    ]);
+  });
 
   test('should not set non-existent values', () => {
     expect(
@@ -426,7 +547,86 @@ describe('auth', () => {
           security: [{ 'auth-header': [] }],
         },
         { auth: {} },
-      ).headers,
+      ).log.entries[0].request.headers,
     ).toEqual([]);
+  });
+});
+
+describe('content-type header', () => {
+  const operation = {
+    path: '/body',
+    method: 'get',
+    requestBody: {
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['a'],
+            properties: {
+              a: {
+                type: 'string',
+              },
+            },
+          },
+          example: { a: 'value' },
+        },
+      },
+    },
+  };
+
+  it('should be sent through if there are no body values but there is a requestBody', () => {
+    expect(oasToHar({}, operation, {}).log.entries[0].request.headers).toEqual([
+      { name: 'Content-Type', value: 'application/json' },
+    ]);
+    expect(oasToHar({}, operation, { query: { a: 1 } }).log.entries[0].request.headers).toEqual([
+      { name: 'Content-Type', value: 'application/json' },
+    ]);
+  });
+
+  it('should be sent through if there are any body values', () => {
+    expect(
+      oasToHar({}, operation, { body: { a: 'test' } }).log.entries[0].request.headers,
+    ).toEqual([{ name: 'Content-Type', value: 'application/json' }]);
+  });
+
+  it('should fetch the type from the first `requestBody.content` object', () => {
+    expect(
+      oasToHar(
+        {},
+        {
+          path: '/body',
+          method: 'get',
+          requestBody: {
+            content: {
+              'text/xml': {
+                schema: {
+                  type: 'object',
+                  required: ['a'],
+                  properties: {
+                    a: {
+                      type: 'string',
+                    },
+                  },
+                },
+                example: { a: 'value' },
+              },
+            },
+          },
+        },
+        { body: { a: 'test' } },
+      ).log.entries[0].request.headers,
+    ).toEqual([{ name: 'Content-Type', value: 'text/xml' }]);
+  });
+
+  it('should default to application/json if no `requestBody.content`', () => {
+    expect(
+      oasToHar({}, Object.assign({}, operation, { requestBody: {} }), { body: { a: 'test' } }).log
+        .entries[0].request.headers,
+    ).toEqual([{ name: 'Content-Type', value: 'application/json' }]);
+    expect(
+      oasToHar({}, Object.assign({}, operation, { requestBody: undefined }), {
+        body: { a: 'test' },
+      }).log.entries[0].request.headers,
+    ).toEqual([{ name: 'Content-Type', value: 'application/json' }]);
   });
 });

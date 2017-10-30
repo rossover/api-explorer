@@ -1,5 +1,7 @@
 const React = require('react');
 const PropTypes = require('prop-types');
+const fetchHar = require('fetch-har');
+const oasToHar = require('./lib/oas-to-har');
 const isAuthReady = require('./lib/is-auth-ready');
 const extensions = require('../../readme-oas-extensions');
 
@@ -24,6 +26,7 @@ class Doc extends React.Component {
     this.onChange = this.onChange.bind(this);
     this.oas = new Oas(this.props.oas);
     this.onSubmit = this.onSubmit.bind(this);
+    this.toggleAuth = this.toggleAuth.bind(this);
   }
 
   onChange(formData) {
@@ -41,10 +44,32 @@ class Doc extends React.Component {
         this.state.formData.auth,
       )
     ) {
-      this.setState({ showAuthBox: true, needsAuth: true });
+      this.setState({ showAuthBox: true });
+      setTimeout(() => {
+        this.authInput.focus();
+        this.setState({ needsAuth: true });
+      }, 600);
       return false;
     }
+
+    this.setState({ loading: true, showAuthBox: false, needsAuth: false });
+
+    fetchHar(
+      oasToHar(
+        this.oas,
+        this.oas.operation(this.props.doc.swagger.path, this.props.doc.api.method),
+        this.state.formData,
+      ),
+    ).then(() => {
+      this.setState({ loading: false });
+    });
+
     return true;
+  }
+
+  toggleAuth(e) {
+    e.preventDefault();
+    this.setState({ showAuthBox: !this.state.showAuthBox });
   }
 
   renderEndpoint() {
@@ -53,18 +78,41 @@ class Doc extends React.Component {
     const operation = oas.operation(doc.swagger.path, doc.api.method);
     return (
       <div className="hub-api">
+<<<<<<< HEAD
         {this.props.flags.stripe ? (
           <div className="hub-reference-section">
+=======
+        <PathUrl
+          oas={oas}
+          operation={operation}
+          dirty={this.state.dirty}
+          loading={this.state.loading}
+          onChange={this.onChange}
+          showAuthBox={this.state.showAuthBox}
+          needsAuth={this.state.needsAuth}
+          toggleAuth={this.toggleAuth}
+          onSubmit={this.onSubmit}
+          authInputRef={el => (this.authInput = el)}
+        />
+
+        {showCode(oas, operation) && (
+          <div className="hub-reference-section hub-reference-section-code">
+>>>>>>> 47d61925d3337d4a380464bd2a67a05c49d378d0
             <div className="hub-reference-left">
               <PathUrl
                 oas={oas}
                 operation={operation}
+<<<<<<< HEAD
                 dirty={this.state.dirty}
                 loading={this.state.loading}
                 onChange={this.onChange}
                 authData={this.state.formData.auth}
                 showAuthBox={this.state.showAuthBox}
                 needsAuth={this.state.needsAuth}
+=======
+                formData={this.state.formData}
+                language={this.props.language}
+>>>>>>> 47d61925d3337d4a380464bd2a67a05c49d378d0
               />
             </div>
           </div>
@@ -189,9 +237,14 @@ Doc.propTypes = {
   }).isRequired,
   oas: PropTypes.shape({}),
   setLanguage: PropTypes.func.isRequired,
+<<<<<<< HEAD
   flags: PropTypes.shape({
     stripe: PropTypes.bool,
   }),
+=======
+  flags: PropTypes.shape({}),
+  language: PropTypes.string.isRequired,
+>>>>>>> 47d61925d3337d4a380464bd2a67a05c49d378d0
 };
 
 Doc.defaultProps = {

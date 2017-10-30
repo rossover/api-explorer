@@ -9,7 +9,7 @@
       "post": {
         "security": [
           {
-            "oauth2": ["write:things"]
+            "oauth": ["write:things"]
           }
         ]
       }
@@ -78,7 +78,8 @@
         "in": "header"
       },
       "basic": {
-        "type": "basic"
+        "type": "http",
+        "scheme": "basic"
       }
     }
   }
