@@ -87,6 +87,11 @@ class Doc extends React.Component {
                 dirty={this.state.dirty}
                 loading={this.state.loading}
                 onChange={this.onChange}
+                authData={this.state.formData.auth}
+                showAuthBox={this.state.showAuthBox}
+                needsAuth={this.state.needsAuth}
+                formData={this.state.formData}
+                language={this.props.language}
               />
             </div>
           </div>
@@ -97,6 +102,9 @@ class Doc extends React.Component {
             dirty={this.state.dirty}
             loading={this.state.loading}
             onChange={this.onChange}
+            authData={this.state.formData.auth}
+            showAuthBox={this.state.showAuthBox}
+            needsAuth={this.state.needsAuth}
           />
         )}
 
@@ -211,6 +219,7 @@ Doc.propTypes = {
   flags: PropTypes.shape({
     stripe: PropTypes.bool,
   }),
+  language: PropTypes.string.isRequired,
 };
 
 Doc.defaultProps = {
