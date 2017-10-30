@@ -1,15 +1,9 @@
+// We require the babel polyfill because the swagger2openapi module uses generators
+require('babel-polyfill');
+
 const React = require('react');
 const ReactDOM = require('react-dom');
-const refParser = require('json-schema-ref-parser');
 
-const oas = require('../packages/api-explorer-ui/__tests__/fixtures/petstore/oas');
-const createDocs = require('../packages/api-explorer-ui/lib/create-docs');
+const Demo = require('./src/Demo');
 
-const ApiExplorer = require('../packages/api-explorer-ui/src/index.jsx');
-
-(async function main() {
-  const docs = createDocs(oas, 'api-setting');
-  const oasFiles = { 'api-setting': await refParser.dereference(oas) };
-
-  ReactDOM.render(<ApiExplorer docs={docs} oasFiles={oasFiles} flags={{ correctnewlines: false, stripe: true }} />, document.getElementById('hub-reference'));
-}());
+ReactDOM.render(<Demo lags={{ correctnewlines: false, stripe: true }} />, document.getElementById('hub-reference'));

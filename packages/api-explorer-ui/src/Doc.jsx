@@ -1,6 +1,8 @@
 const React = require('react');
 const PropTypes = require('prop-types');
-
+const fetchHar = require('fetch-har');
+const oasToHar = require('./lib/oas-to-har');
+const isAuthReady = require('./lib/is-auth-ready');
 const extensions = require('../../readme-oas-extensions');
 
 const PathUrl = require('./PathUrl');
@@ -14,9 +16,17 @@ const Content = require('./block-types/Content');
 class Doc extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { formData: {}, dirty: false, loading: false };
+    this.state = {
+      formData: {},
+      dirty: false,
+      loading: false,
+      showAuthBox: false,
+      needsAuth: false,
+    };
     this.onChange = this.onChange.bind(this);
     this.oas = new Oas(this.props.oas);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.toggleAuth = this.toggleAuth.bind(this);
   }
 
   onChange(formData) {
@@ -27,12 +37,45 @@ class Doc extends React.Component {
       };
     });
   }
+  onSubmit() {
+    if (
+      !isAuthReady(
+        this.oas.operation(this.props.doc.swagger.path, this.props.doc.api.method),
+        this.state.formData.auth,
+      )
+    ) {
+      this.setState({ showAuthBox: true });
+      setTimeout(() => {
+        this.authInput.focus();
+        this.setState({ needsAuth: true });
+      }, 600);
+      return false;
+    }
+
+    this.setState({ loading: true, showAuthBox: false, needsAuth: false });
+
+    fetchHar(
+      oasToHar(
+        this.oas,
+        this.oas.operation(this.props.doc.swagger.path, this.props.doc.api.method),
+        this.state.formData,
+      ),
+    ).then(() => {
+      this.setState({ loading: false });
+    });
+
+    return true;
+  }
+
+  toggleAuth(e) {
+    e.preventDefault();
+    this.setState({ showAuthBox: !this.state.showAuthBox });
+  }
 
   renderEndpoint() {
     const { doc, setLanguage } = this.props;
     const oas = this.oas;
     const operation = oas.operation(doc.swagger.path, doc.api.method);
-
     return (
       <div className="hub-api">
         {this.props.flags.stripe ? (
@@ -91,6 +134,7 @@ class Doc extends React.Component {
               operation={operation}
               formData={this.state.formData}
               onChange={this.onChange}
+              onSubmit={this.onSubmit}
             />
           </div>
           <div className="hub-reference-right switcher" />

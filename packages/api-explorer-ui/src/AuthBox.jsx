@@ -4,12 +4,12 @@ const classNames = require('classnames');
 const SecurityInput = require('./SecurityInput');
 const { Operation } = require('./lib/Oas');
 
-function renderSecurities(operation, onChange) {
+function renderSecurities(authInputRef, operation, onChange, onSubmit) {
   const securityTypes = operation.prepareSecurity();
   return Object.keys(securityTypes).map(type => {
     const securities = securityTypes[type];
     return (
-      <span key={type}>
+      <form key={type} onSubmit={onSubmit}>
         <h3>{type} Auth</h3>
         <div className="pad">
           <section>
@@ -26,11 +26,17 @@ function renderSecurities(operation, onChange) {
               // )
             }
             {securities.map(security => (
-              <SecurityInput key={security._key} scheme={security} apiKey="" onChange={onChange} />
+              <SecurityInput
+                key={security._key}
+                scheme={security}
+                apiKey=""
+                onChange={onChange}
+                authInputRef={authInputRef}
+              />
             ))}
           </section>
         </div>
-      </span>
+      </form>
     );
   });
 }
@@ -38,32 +44,43 @@ function renderSecurities(operation, onChange) {
 class AuthBox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { open: false };
-
-    this.toggle = this.toggle.bind(this);
+    this.state = {};
+    this.onChange = this.onChange.bind(this);
   }
-  toggle(e) {
-    e.preventDefault();
-    this.setState({ open: !this.state.open });
-    // this.props.onChange({ header: { 'test': '111' } });
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.auth !== this.state.auth) this.props.onChange({ auth: this.state.auth });
   }
-
+  onChange(auth) {
+    this.setState(previousState => {
+      return {
+        auth: Object.assign({}, previousState.auth, auth),
+      };
+    });
+  }
   render() {
-    const { operation } = this.props;
-
+    const { authInputRef, operation, onSubmit, open, needsAuth, toggle } = this.props;
     if (!operation.hasAuth()) return null;
 
     return (
-      <div
-        className={classNames('hub-auth-dropdown', 'simple-dropdown', { open: this.state.open })}
-      >
+      <div className={classNames('hub-auth-dropdown', 'simple-dropdown', { open })}>
         {
           // eslint-disable-next-line jsx-a11y/anchor-has-content
-          <a href="" className="icon icon-user-lock" onClick={this.toggle} />
+          <a href="" className="icon icon-user-lock" onClick={toggle} />
         }
         <div className="nopad">
           <div className="triangle" />
-          <div>{renderSecurities(operation, this.props.onChange)}</div>
+          <div>
+            {renderSecurities(authInputRef, operation, this.onChange, e => {
+              e.preventDefault();
+              onSubmit();
+            })}
+          </div>
+          <div className={classNames('hub-authrequired', { active: needsAuth })}>
+            <div className="hub-authrequired-slider">
+              <i className="icon icon-notification" />
+              Authentication is required for this endpoint
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -72,7 +89,18 @@ class AuthBox extends React.Component {
 
 AuthBox.propTypes = {
   operation: PropTypes.instanceOf(Operation).isRequired,
+  authInputRef: PropTypes.func,
   onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  toggle: PropTypes.func.isRequired,
+  needsAuth: PropTypes.bool,
+  open: PropTypes.bool,
+};
+
+AuthBox.defaultProps = {
+  needsAuth: false,
+  open: false,
+  authInputRef: () => {},
 };
 
 module.exports = AuthBox;

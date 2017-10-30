@@ -1,5 +1,5 @@
 const syntaxHighlighter = require('../../../readme-syntax-highlighter');
-const { getLangName } = require('../lib/generate-code-snippets');
+const { getLangName } = require('../lib/generate-code-snippet');
 const statusCodes = require('../lib/statuscodes');
 const PropTypes = require('prop-types');
 const React = require('react');
@@ -30,7 +30,6 @@ class BlockCode extends React.Component {
                   <a
                     href=""
                     onClick={e => {
-                      // eslint-disable-next-line
                       e.preventDefault();
                       this.showCode(i);
                     }}

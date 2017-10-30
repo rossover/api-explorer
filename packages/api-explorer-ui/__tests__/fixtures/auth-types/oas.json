@@ -5,39 +5,31 @@
     "title": "Multiple Securities"
   },
   "paths": {
-    "/things": {
+    "/oauth": {
       "post": {
-        "security": [{
-          "oauth": ["write:things"]
-        }, {
-          "apiKey": []
-        }]
+        "security": [
+          {
+            "oauth": ["write:things"]
+          }
+        ]
       }
     },
-    "/and-security": {
+    "/api-key": {
       "post": {
-        "security": [{
-          "oauth": ["write:things"],
-          "apiKey": []
-        }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
-    "/and-or-security": {
+    "/basic": {
       "post": {
-        "security": [{
-          "oauth": ["write:things"],
-          "apiKey": []
-        },
-        {
-          "oauthDiff": ["write:things"]
-        }]
-      }
-    },
-    "/single-auth": {
-      "post": {
-        "security": [{
-          "apiKey": []
-        }]
+        "security": [
+          {
+            "basic": []
+          }
+        ]
       }
     },
     "/no-auth": {
@@ -45,11 +37,14 @@
     },
     "/multiple-oauths": {
       "post": {
-        "security": [{
-          "oauth": ["write:things", "read:things"]
-        }, {
-          "oauthDiff": ["write:things", "read:things"]
-        }]
+        "security": [
+          {
+            "oauth": ["write:things", "read:things"]
+          },
+          {
+            "oauthDiff": ["write:things", "read:things"]
+          }
+        ]
       }
     }
   },
@@ -81,7 +76,11 @@
         "type": "apiKey",
         "name": "apiKey",
         "in": "header"
+      },
+      "basic": {
+        "type": "http",
+        "scheme": "basic"
       }
-    }    
+    }
   }
 }

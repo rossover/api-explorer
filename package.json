@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "test": "eslint -f unix example && lerna run test",
-    "example": "budo example/index.jsx --dir example -- -t babelify -p livereactload --extension .jsx",
+    "example": "node scripts/update-example-swagger-files && budo example/index.jsx --dir example -- -t babelify -p livereactload --extension .jsx",
     "build": "watchify packages/api-explorer-ui/src/index.jsx -t [ babelify ] -o 'derequire > packages/api-explorer-ui/dist/index.js' --extension jsx --standalone ApiExplorer"
   },
   "publishConfig": {
@@ -30,12 +30,14 @@
     "lerna": "^2.0.0"
   },
   "dependencies": {
-    "body-parser": "^1.17.2",
+    "babel-polyfill": "^6.26.0",
+    "circular-json": "^0.3.3",
     "json-schema-ref-parser": "^3.2.0",
     "livereactload": "^4.0.0-beta.2",
+    "prop-types": "^15.6.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-hot-loader": "^3.0.0-beta.7",
-    "swagger2openapi": "^2.5.0"
+    "swagger2openapi": "^2.9.2"
   }
 }

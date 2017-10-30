@@ -1,7 +1,10 @@
-const React = require('react');
-const { shallow } = require('enzyme');
-const Doc = require('../src/Doc');
+global.fetch = require('node-fetch');
 
+global.Request = fetch.Request;
+
+const React = require('react');
+const { shallow, mount } = require('enzyme');
+const Doc = require('../src/Doc');
 const oas = require('./fixtures/petstore/oas');
 
 const props = {
@@ -11,9 +14,12 @@ const props = {
     type: 'endpoint',
     swagger: { path: '/pet/{petId}' },
     api: { method: 'get' },
+    formData: { path: { petId: '1' }, auth: { api_key: '' } },
+    onSubmit: () => {},
   },
   oas,
   setLanguage: () => {},
+  language: 'node',
 };
 
 function assertDocElements(component, doc) {
@@ -35,7 +41,7 @@ test('should output a div', () => {
 
 test('should work without a doc.swagger/doc.path/oas', () => {
   const doc = { title: 'title', slug: 'slug', type: 'basic' };
-  const docComponent = shallow(<Doc doc={doc} setLanguage={() => {}} />);
+  const docComponent = shallow(<Doc doc={doc} setLanguage={() => {}} language="node" />);
 
   assertDocElements(docComponent, doc);
   expect(docComponent.find('.hub-api').length).toBe(0);
@@ -57,6 +63,47 @@ describe('state.dirty', () => {
   });
 });
 
+describe('onSubmit', () => {
+  test('should display authentication warning if auth is required for endpoint', () => {
+    jest.useFakeTimers();
+
+    const doc = mount(<Doc {...props} />);
+
+    doc.instance().onSubmit();
+    expect(doc.state('showAuthBox')).toBe(true);
+
+    jest.runAllTimers();
+
+    expect(doc.state('needsAuth')).toBe(true);
+  });
+
+  test('should hide authBox on successful submit', () => {
+    const doc = mount(<Doc {...props} />);
+    doc.instance().onSubmit();
+    doc.instance().onChange({ auth: { api_key: 'api-key' } });
+    doc.instance().onSubmit();
+
+    expect(doc.state('showAuthBox')).toBe(false);
+    expect(doc.state('needsAuth')).toBe(false);
+  });
+});
+
+describe('toggleAuth', () => {
+  test('toggleAuth should change state of showAuthBox', () => {
+    const doc = shallow(<Doc {...props} />);
+
+    expect(doc.state('showAuthBox')).toBe(false);
+
+    doc.instance().toggleAuth({ preventDefault() {} });
+
+    expect(doc.state('showAuthBox')).toBe(true);
+
+    doc.instance().toggleAuth({ preventDefault() {} });
+
+    expect(doc.state('showAuthBox')).toBe(false);
+  });
+});
+
 describe('state.loading', () => {
   test('should default to false', () => {
     const doc = shallow(<Doc {...props} />);
@@ -64,9 +111,10 @@ describe('state.loading', () => {
     expect(doc.state('loading')).toBe(false);
   });
 
-  test.skip('should switch to true on form submit', () => {
+  test('should switch to true on form submit', () => {
     const doc = shallow(<Doc {...props} />);
-    doc.instance().onSubmit({ a: 1 });
+    doc.instance().onChange({ auth: { api_key: 'api-key' } });
+    doc.instance().onSubmit();
 
     expect(doc.state('loading')).toBe(true);
   });

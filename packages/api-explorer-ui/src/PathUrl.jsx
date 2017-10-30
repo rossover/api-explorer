@@ -1,7 +1,6 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 const classNames = require('classnames');
-
 const AuthBox = require('./AuthBox');
 const Oas = require('./lib/Oas');
 
@@ -17,15 +16,33 @@ function splitPath(path) {
       return { type: part.match(/[{}]/) ? 'variable' : 'text', value: part.replace(/[{}]/g, '') };
     });
 }
-
-function PathUrl({ oas, operation, loading, dirty, onChange }) {
+function PathUrl({
+  oas,
+  operation,
+  authInputRef,
+  loading,
+  dirty,
+  onChange,
+  showAuthBox,
+  needsAuth,
+  toggleAuth,
+  onSubmit,
+}) {
   return (
     <div className="api-definition-parent">
       <div className="api-definition">
         <div className="api-definition-container">
           {oas[extensions.EXPLORER_ENABLED] && (
             <div className="api-definition-actions">
-              <AuthBox operation={operation} onChange={onChange} />
+              <AuthBox
+                operation={operation}
+                onChange={onChange}
+                onSubmit={onSubmit}
+                open={showAuthBox}
+                needsAuth={needsAuth}
+                toggle={toggleAuth}
+                authInputRef={authInputRef}
+              />
 
               <button
                 form={`form-${operation.operationId}`}
@@ -67,9 +84,19 @@ function PathUrl({ oas, operation, loading, dirty, onChange }) {
 PathUrl.propTypes = {
   oas: PropTypes.instanceOf(Oas).isRequired,
   operation: PropTypes.instanceOf(Operation).isRequired,
+  authInputRef: PropTypes.func,
   dirty: PropTypes.bool.isRequired,
   loading: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
+  toggleAuth: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  showAuthBox: PropTypes.bool,
+  needsAuth: PropTypes.bool,
 };
 
+PathUrl.defaultProps = {
+  showAuthBox: false,
+  needsAuth: false,
+  authInputRef: () => {},
+};
 module.exports = PathUrl;

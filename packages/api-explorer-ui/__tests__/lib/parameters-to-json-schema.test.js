@@ -18,89 +18,186 @@ test('it should return with a json schema for each parameter type', () => {
       },
       {},
     ),
-  ).toEqual({
-    type: 'object',
-    definitions: {},
-    properties: {
-      cookie: {
-        description: 'Cookie Params',
-        type: 'object',
-        properties: {
-          'cookie parameter': {
-            description: null,
-            type: 'string',
-          },
-        },
-        required: [],
-      },
-      header: {
-        description: 'Headers',
-        type: 'object',
-        properties: {
-          'header parameter': {
-            description: null,
-            type: 'string',
-          },
-        },
-        required: [],
-      },
-      path: {
-        description: 'Path Params',
+  ).toEqual([
+    {
+      label: 'Path Params',
+      type: 'path',
+      schema: {
         type: 'object',
         properties: {
           'path parameter': {
-            description: null,
-            type: 'string',
-          },
-        },
-        required: [],
-      },
-      query: {
-        description: 'Query Params',
-        type: 'object',
-        properties: {
-          'query parameter': {
-            description: null,
             type: 'string',
           },
         },
         required: [],
       },
     },
-  });
+    {
+      label: 'Query Params',
+      type: 'query',
+      schema: {
+        type: 'object',
+        properties: {
+          'query parameter': {
+            type: 'string',
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      label: 'Cookie Params',
+      type: 'cookie',
+      schema: {
+        type: 'object',
+        properties: {
+          'cookie parameter': {
+            type: 'string',
+          },
+        },
+        required: [],
+      },
+    },
+    {
+      label: 'Headers',
+      type: 'header',
+      schema: {
+        type: 'object',
+        properties: {
+          'header parameter': {
+            type: 'string',
+          },
+        },
+        required: [],
+      },
+    },
+  ]);
 });
 
 test('it should work for request body inline', () => {
   expect(
-    parametersToJsonSchema(
-      {
-        requestBody: {
-          description: 'Body description',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: { a: { type: 'string' } },
-              },
+    parametersToJsonSchema({
+      requestBody: {
+        description: 'Body description',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: { a: { type: 'string' } },
             },
           },
         },
       },
-      {},
-    ),
-  ).toEqual({
-    type: 'object',
-    definitions: {},
-    properties: {
-      body: {
-        description: 'Body Params',
+    }),
+  ).toEqual([
+    {
+      label: 'Body Params',
+      type: 'body',
+      schema: {
         type: 'object',
         properties: {
           a: { type: 'string' },
         },
       },
     },
-  });
+  ]);
+});
+
+test('should pass through enum', () => {
+  expect(
+    parametersToJsonSchema({
+      parameters: [
+        {
+          in: 'header',
+          name: 'Accept',
+          required: false,
+          schema: {
+            type: 'string',
+            enum: ['application/json', 'application/xml'],
+          },
+        },
+      ],
+    }),
+  ).toEqual([
+    {
+      label: 'Headers',
+      type: 'header',
+      schema: {
+        type: 'object',
+        properties: {
+          Accept: {
+            type: 'string',
+            enum: ['application/json', 'application/xml'],
+          },
+        },
+        required: [],
+      },
+    },
+  ]);
+});
+
+test('should pass through defaults', () => {
+  expect(
+    parametersToJsonSchema({
+      parameters: [
+        {
+          in: 'header',
+          name: 'Accept',
+          schema: {
+            type: 'string',
+            default: 'application/json',
+          },
+        },
+      ],
+    }),
+  ).toEqual([
+    {
+      label: 'Headers',
+      type: 'header',
+      schema: {
+        type: 'object',
+        properties: {
+          Accept: {
+            default: 'application/json',
+            type: 'string',
+          },
+        },
+        required: [],
+      },
+    },
+  ]);
+});
+
+test('it should pass through description', () => {
+  expect(
+    parametersToJsonSchema({
+      parameters: [
+        {
+          in: 'header',
+          name: 'Accept',
+          description: 'Expected response format.',
+          schema: {
+            type: 'string',
+          },
+        },
+      ],
+    }),
+  ).toEqual([
+    {
+      label: 'Headers',
+      type: 'header',
+      schema: {
+        type: 'object',
+        properties: {
+          Accept: {
+            description: 'Expected response format.',
+            type: 'string',
+          },
+        },
+        required: [],
+      },
+    },
+  ]);
 });
 
 test.skip('it should work for top-level request body $ref', () => {
@@ -236,4 +333,3 @@ test.skip('it should work for schemas not in components/schemas', () => {
 });
 
 test('it should make things required correctly');
-test('it should pass through description');
