@@ -11,8 +11,12 @@ const props = {
   onSubmit: () => {},
 };
 
-test('form id should be set to the operationId', () => {
+test('form id should be set to the operationId + form type', () => {
   const oas = new Oas(petstore);
   const operation = oas.operation('/pet/{petId}', 'get');
-  expect(shallow(<Params {...props} oas={oas} operation={operation} />).find(`#form-${operation.operationId}`).length).toBe(1);
+  expect(
+    shallow(<Params {...props} oas={oas} operation={operation} />).find(
+      `#form-${operation.operationId}-path`,
+    ).length,
+  ).toBe(1);
 });

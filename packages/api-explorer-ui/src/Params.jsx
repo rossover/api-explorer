@@ -16,11 +16,25 @@ const parametersToJsonSchema = require('./lib/parameters-to-json-schema');
 
 function Params({ oas, operation, formData, onChange, onSubmit }) {
   const jsonSchema = parametersToJsonSchema(operation, oas);
+
+  const forms = [];
+
+  // This is kinda hacky but it's the only way we can make sure we
+  // only call onSubmit when all of the forms are valid
+  //
+  // Otherwise if the users presses <enter> whilst they're in the first
+  // form, it'll bypass any validation in the 2nd form.
+  function submit() {
+    return forms.every(form => {
+      return form.validate(form.state.formData).errors.length === 0;
+    }) && onSubmit();
+  }
+
   return (
     <div className="api-manager">
       <div className="param-table">
         {jsonSchema &&
-          jsonSchema.map(schema => {
+          jsonSchema.map((schema) => {
             return [
               <div className="param-header" key={`${schema.type}-header`}>
                 <h3>{schema.label}</h3>
@@ -28,7 +42,7 @@ function Params({ oas, operation, formData, onChange, onSubmit }) {
               </div>,
               <Form
                 key={`${schema.type}-form`}
-                id={`form-${operation.operationId}`}
+                id={`form-${operation.operationId}-${schema.type}`}
                 schema={schema.schema}
                 widgets={{
                   int64: UpDownWidget,
@@ -38,18 +52,20 @@ function Params({ oas, operation, formData, onChange, onSubmit }) {
                   binary: FileWidget,
                   TextWidget,
                 }}
-                onSubmit={onSubmit}
+                onSubmit={submit}
                 formData={formData[schema.type]}
                 onChange={form => {
                   // return onChange({ [schema.type]: { $set: form.formData } })
                   return onChange({ [schema.type]: form.formData });
                 }}
+                onError={() => {}}
                 FieldTemplate={FieldTemplate}
                 fields={{
                   ObjectField,
                   SchemaField,
                   TitleField: () => null,
                 }}
+                ref={form => forms.push(form)}
               >
                 <button type="submit" style={{ display: 'none' }} />
               </Form>,

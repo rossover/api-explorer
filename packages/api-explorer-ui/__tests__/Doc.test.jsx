@@ -6,6 +6,7 @@ const React = require('react');
 const { shallow, mount } = require('enzyme');
 const Doc = require('../src/Doc');
 const oas = require('./fixtures/petstore/oas');
+const multipleParamTypesRequired = require('./fixtures/multiple-param-types-required.json');
 
 const props = {
   doc: {
@@ -15,7 +16,6 @@ const props = {
     swagger: { path: '/pet/{petId}' },
     api: { method: 'get' },
     formData: { path: { petId: '1' }, auth: { api_key: '' } },
-    onSubmit: () => {},
   },
   oas,
   setLanguage: () => {},
@@ -86,6 +86,47 @@ describe('onSubmit', () => {
     expect(doc.state('showAuthBox')).toBe(false);
     expect(doc.state('needsAuth')).toBe(false);
   });
+
+  test('should only be called when all forms are valid', () => {
+    const doc = mount(
+      <Doc
+        {...props}
+        doc={Object.assign({}, props.doc, {
+          swagger: { path: '/things/{test}' },
+          api: { method: 'post' },
+        })}
+        oas={multipleParamTypesRequired}
+      />,
+    );
+
+    const queryForm = doc
+      .find('#form-thingsTest-query')
+      .at(0)
+      .instance();
+    const pathForm = doc
+      .find('#form-thingsTest-path')
+      .at(0)
+      .instance();
+
+    const docInstance = doc.instance();
+    const spy = jest.spyOn(docInstance, 'onSubmit').mockImplementation(() => {});
+
+    pathForm.onSubmit({ preventDefault() {} });
+    queryForm.onSubmit({ preventDefault() {} });
+    expect(spy.mock.calls.length).toBe(0);
+
+    doc.instance().onChange({ query: { query: 'query' } });
+    queryForm.onSubmit({ preventDefault() {} });
+
+    expect(spy.mock.calls.length).toBe(0);
+
+    doc.instance().onChange({ path: { path: 'path' } });
+    pathForm.onSubmit({ preventDefault() {} });
+
+    expect(spy.mock.calls.length).toBe(1);
+  });
+
+  test('should be called if there are no forms');
 });
 
 describe('toggleAuth', () => {
