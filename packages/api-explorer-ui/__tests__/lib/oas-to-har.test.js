@@ -79,6 +79,20 @@ describe('url', () => {
         ).log.entries[0].request.url,
       ).toBe('https://try.readme.io/http://example.com/path');
     });
+
+    test('should  not be prefixed with try.readme.io with option', () => {
+      expect(
+        oasToHar(
+          {
+            servers: [{ url: 'https://example.com' }],
+            [extensions.PROXY_ENABLED]: true,
+          },
+          { path: '/path', method: 'get' },
+          {},
+          { proxyUrl: true },
+        ).log.entries[0].request.url,
+      ).toBe('https://example.com/path');
+    });
   });
 });
 

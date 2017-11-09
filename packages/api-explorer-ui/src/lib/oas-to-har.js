@@ -75,7 +75,9 @@ module.exports = (
   };
 
   if (oas[extensions.PROXY_ENABLED] && opts.proxyUrl) {
-    har.url = `https://try.readme.io/${har.url}`;
+    if (har.url.slice(0, 5) !== 'https') {
+      har.url = `https://try.readme.io/${har.url}`;
+    }
   }
 
   har.url = har.url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, (full, key) => {
