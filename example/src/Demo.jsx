@@ -52,6 +52,7 @@ class Demo extends React.Component {
     this.setState({ docs: createDocs(oas, 'api-setting') });
   }
   render() {
+    console.log(this.state.docs);
     return (
       <div>
         <div className="api-list-header">
