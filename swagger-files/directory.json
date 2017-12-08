@@ -3,7 +3,7 @@
     "preferred": "1.0",
     "versions": {
       "1.0": {
-        "swaggerUrl": "/swagger-files/examples.json"
+        "swaggerUrl": "swagger-files/examples.json"
       }
     }
   },
@@ -11,7 +11,7 @@
     "preferred": "1.0.0",
     "versions": {
       "1.0.0": {
-        "swaggerUrl": "/swagger-files/multiple-securities.json"
+        "swaggerUrl": "swagger-files/multiple-securities.json"
       }
     }
   },
@@ -19,7 +19,7 @@
     "preferred": "1.0.0",
     "versions": {
       "1.0.0": {
-        "swaggerUrl": "/swagger-files/petstore.json"
+        "swaggerUrl": "swagger-files/petstore.json"
       }
     }
   }
