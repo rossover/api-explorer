@@ -11,6 +11,7 @@ const ObjectField = require('./form-components/ObjectField');
 const SchemaField = require('./form-components/SchemaField');
 const FieldTemplate = require('./form-components/FieldTemplate');
 const DescriptionField = require('./form-components/DescriptionField');
+const CheckboxWidget = require('./form-components/CheckboxWidget');
 
 const Oas = require('./lib/Oas');
 
@@ -44,6 +45,7 @@ function Params({ oas, operation, formData, onChange, onSubmit }) {
                   duration: TextWidget,
                   dateTime: DateTimeWidget,
                   integer: UpDownWidget,
+                  CheckboxWidget,
                   TextWidget,
                 }}
                 onSubmit={onSubmit}
