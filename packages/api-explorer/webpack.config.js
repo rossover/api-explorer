@@ -4,13 +4,15 @@ module.exports = {
     rules: [
       {
         test: /\.js(x?)$/,
-        exclude: /node_modules\/(?!@readme\/syntax-highlighter)/,
+        target: 'web',
+        exclude: /node_modules\/(?!@readme\/syntax-highlighter|swagger2openapi)/,
         use: {
           loader: 'babel-loader',
         },
       },
     ],
   },
+  externals: /node_modules\/(?!@readme\/syntax-highlighter|swagger2openapi)/,
   output: {
     filename: './dist/index.js',
     libraryTarget: 'commonjs2',

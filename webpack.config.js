@@ -12,6 +12,19 @@ module.exports = merge(common, {
     port: 9966,
     hot: true,
   },
+  module: {
+    rules: [
+      {
+        test: /\.js(x?)$/,
+        target: 'web',
+        exclude: /node_modules\/(?!@readme\/syntax-highlighter|swagger2openapi)/,
+        use: {
+          loader: 'babel-loader',
+        },
+      },
+    ],
+  },
+  externals: /node_modules\/(?!@readme\/syntax-highlighter|swagger2openapi)/,
   plugins: [
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
