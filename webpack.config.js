@@ -16,7 +16,6 @@ module.exports = merge(common, {
     rules: [
       {
         test: /\.js(x?)$/,
-        target: 'web',
         exclude: /node_modules\/(?!@readme\/syntax-highlighter|swagger2openapi)/,
         use: {
           loader: 'babel-loader',

@@ -1,4 +1,4 @@
-// We require the babel polyfill because the swagger2openapi module uses generators
+ // We require the babel polyfill because the swagger2openapi module uses generators
 require('babel-polyfill');
 
 const React = require('react');
